@@ -5,15 +5,28 @@ const faqBox = document.getElementById("faq");
 const categoryTabs = document.getElementById("categoryTabs");
 const noticeBar = document.getElementById("noticeBar");
 const metaText = document.getElementById("metaText");
+const adminLink = document.getElementById("adminLink");
 
 const params = new URLSearchParams(location.search);
-const cohort = params.get("cohort") || "722";
+const cohort = params.get("cohort") || "724";
 
-let fullFaq = [];
 let currentCategory = "전체";
 
 const categoryMap = {
-  "전체": [],
+  "전체": [
+    "안심해! 든든해! 병영캠프",
+    "입영 시간 언제야",
+    "입영 장소 어디야",
+    "준비물 뭐 챙겨야 해",
+    "운동화 어떤 거 신어",
+    "핸드폰 가져가도 돼",
+    "시계 가져가도 돼",
+    "약 가져가도 돼",
+    "훈련 기간 얼마나 돼",
+    "수료식 언제야",
+    "부모님 연락 언제 해",
+    "택배 받을 수 있어"
+  ],
   "입영정보": [
     "입영일 언제야",
     "입영 시간 언제야",
@@ -39,7 +52,8 @@ const categoryMap = {
     "부모님 면회 언제 가능해",
     "수료식 언제야",
     "부모님 연락 언제 해",
-    "긴급 연락은 어떻게 해"
+    "긴급 연락은 어떻게 해",
+    "택배 받을 수 있어"
   ]
 };
 
@@ -75,26 +89,7 @@ function renderCategories() {
 function renderFaqButtons() {
   faqBox.innerHTML = "";
 
-  let questions = [];
-
-  if (currentCategory === "전체") {
-    questions = [
-      "안심해! 든든해! 병영캠프",
-      "입영 시간 언제야",
-      "입영 장소 어디야",
-      "준비물 뭐 챙겨야 해",
-      "운동화 어떤 거 신어",
-      "핸드폰 가져가도 돼",
-      "시계 가져가도 돼",
-      "약 가져가도 돼",
-      "훈련 기간 얼마나 돼",
-      "수료식 언제야",
-      "부모님 연락 언제 해",
-      "택배 받을 수 있어"
-    ];
-  } else {
-    questions = categoryMap[currentCategory] || [];
-  }
+  const questions = categoryMap[currentCategory] || [];
 
   questions.forEach((q) => {
     const btn = document.createElement("button");
@@ -112,6 +107,7 @@ function renderFaqButtons() {
 async function loadMeta() {
   try {
     const res = await fetch(`/api/cohort/${cohort}`);
+    if (!res.ok) throw new Error("meta load failed");
     const data = await res.json();
 
     noticeBar.innerText = `공지 ${data.notice || "공지사항이 없습니다."}`;
@@ -119,16 +115,6 @@ async function loadMeta() {
   } catch (e) {
     noticeBar.innerText = "공지 안내 정보를 불러오지 못했습니다.";
     metaText.innerText = "기본 안내 화면입니다.";
-  }
-}
-
-async function loadFaq() {
-  try {
-    const res = await fetch(`/api/cohort_full/${cohort}`);
-    const data = await res.json();
-    fullFaq = data.faq || [];
-  } catch (e) {
-    fullFaq = [];
   }
 }
 
@@ -151,7 +137,12 @@ async function send() {
       })
     });
 
-    const data = await res.json();
+    let data = {};
+    try {
+      data = await res.json();
+    } catch {
+      data = {};
+    }
 
     if (!res.ok) {
       addBubble("서버 오류가 발생했어요. 잠시 후 다시 시도해 주세요.", "bot");
@@ -172,11 +163,11 @@ msgInput.addEventListener("keydown", (e) => {
 });
 
 async function init() {
+  adminLink.href = `/admin?cohort=${cohort}`;
   await loadMeta();
-  await loadFaq();
   renderCategories();
   renderFaqButtons();
-  addBubble("안녕하세요. 해군 724기 입영 안내 챗봇입니다. 위 질문 버튼을 누르거나 직접 질문해 주세요.", "bot");
+  addBubble(`안녕하세요. 해군병 ${cohort}기 안내 챗봇입니다. 위 질문 버튼을 누르거나 직접 질문해 주세요.`, "bot");
 }
 
 init();

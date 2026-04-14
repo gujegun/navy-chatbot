@@ -2,12 +2,20 @@ import json
 import os
 import re
 
-BASE_DIR = os.path.dirname(__file__)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 def load_cohort(cohort: str):
     path = os.path.join(BASE_DIR, "data", "cohorts", f"{cohort}.json")
+
+    # 없으면 724 → 722 순서로 fallback
     if not os.path.exists(path):
-        path = os.path.join(BASE_DIR, "data", "cohorts", "722.json")
+        fallback_724 = os.path.join(BASE_DIR, "data", "cohorts", "724.json")
+        fallback_722 = os.path.join(BASE_DIR, "data", "cohorts", "722.json")
+
+        if os.path.exists(fallback_724):
+            path = fallback_724
+        else:
+            path = fallback_722
 
     with open(path, "r", encoding="utf-8") as f:
         return json.load(f)
@@ -34,11 +42,17 @@ def find_answer(message: str, cohort_data: dict) -> str:
             q_list = q
 
         for qtext in q_list:
-            # 1. 완전 일치 우선
-            if _normalize(qtext) == msg:
+            q_norm = _normalize(str(qtext))
+
+            # 1. 완전 일치
+            if q_norm == msg:
                 return a
 
-            # 2. 부분 포함 매칭
+            # 2. 질문 포함 관계
+            if q_norm and (q_norm in msg or msg in q_norm):
+                return a
+
+            # 3. 원문 기준 부분 포함
             safe = re.escape(str(qtext))
             if re.search(safe, msg_raw, re.IGNORECASE):
                 return a
