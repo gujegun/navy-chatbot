@@ -1,15 +1,229 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <title>해군 입영 안내 챗봇</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>해군병 과정 안내 챗봇</title>
+  <style>
+    :root{
+      --bg:#f4f6fb;
+      --card:#ffffff;
+      --line:#e5e7eb;
+      --text:#111827;
+      --muted:#6b7280;
+      --primary:#1d4ed8;
+      --primary-dark:#1e40af;
+      --chip:#ffffff;
+    }
+
+    *{ box-sizing:border-box; }
+
+    body{
+      margin:0;
+      background:var(--bg);
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+      color:var(--text);
+    }
+
+    .notice-bar{
+      position:sticky;
+      top:0;
+      z-index:100;
+      background:var(--primary);
+      color:#fff;
+      padding:12px 14px;
+      font-size:14px;
+      font-weight:700;
+    }
+
+    .wrap{
+      max-width:860px;
+      margin:0 auto;
+      padding:14px;
+    }
+
+    .card{
+      background:var(--card);
+      border-radius:20px;
+      box-shadow:0 6px 20px rgba(0,0,0,0.06);
+      padding:18px;
+    }
+
+    h1{
+      margin:0 0 8px 0;
+      font-size:22px;
+      font-weight:900;
+    }
+
+    .sub{
+      color:var(--muted);
+      line-height:1.5;
+      font-size:14px;
+      margin-bottom:16px;
+    }
+
+    .section-title{
+      font-size:15px;
+      font-weight:900;
+      margin:14px 0 10px 0;
+    }
+
+    #categoryTabs, #faq{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+    }
+
+    .tab-btn, .faq-btn{
+      border:1px solid var(--line);
+      background:var(--chip);
+      border-radius:999px;
+      padding:10px 14px;
+      font-size:15px;
+      cursor:pointer;
+      font-weight:700;
+    }
+
+    .tab-btn.active{
+      background:var(--primary);
+      color:#fff;
+      border-color:var(--primary);
+    }
+
+    .faq-btn{
+      font-size:14px;
+      background:#fff;
+    }
+
+    #chat{
+      margin-top:16px;
+      background:#f8f9fc;
+      border:1px solid var(--line);
+      border-radius:18px;
+      min-height:380px;
+      max-height:540px;
+      overflow:auto;
+      padding:14px;
+    }
+
+    .msg-row{
+      display:flex;
+      margin:10px 0;
+    }
+
+    .msg-row.me{
+      justify-content:flex-end;
+    }
+
+    .msg-row.bot{
+      justify-content:flex-start;
+    }
+
+    .bubble{
+      max-width:82%;
+      padding:12px 14px;
+      border-radius:18px;
+      line-height:1.5;
+      white-space:pre-wrap;
+      font-size:15px;
+    }
+
+    .bubble.me{
+      background:var(--primary);
+      color:#fff;
+      border-bottom-right-radius:6px;
+    }
+
+    .bubble.bot{
+      background:#fff;
+      border:1px solid var(--line);
+      border-bottom-left-radius:6px;
+    }
+
+    .input-wrap{
+      display:flex;
+      gap:8px;
+      margin-top:14px;
+    }
+
+    #msg{
+      flex:1;
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:14px;
+      font-size:16px;
+      outline:none;
+      background:#fff;
+    }
+
+    #sendBtn{
+      border:none;
+      background:#111827;
+      color:#fff;
+      border-radius:14px;
+      padding:0 18px;
+      font-size:16px;
+      font-weight:800;
+      cursor:pointer;
+    }
+
+    .admin-link{
+      display:inline-block;
+      margin-top:12px;
+      font-size:12px;
+      color:#6b7280;
+      text-decoration:none;
+    }
+
+    @media (max-width: 480px){
+      .wrap{ padding:10px; }
+      .card{ padding:14px; border-radius:16px; }
+      h1{ font-size:18px; }
+      .sub{ font-size:13px; }
+      .tab-btn, .faq-btn{
+        font-size:14px;
+        padding:10px 12px;
+      }
+      #chat{
+        min-height:320px;
+        max-height:460px;
+      }
+      .bubble{
+        max-width:88%;
+        font-size:15px;
+      }
+      #msg{
+        font-size:16px;
+      }
+    }
+  </style>
 </head>
 <body>
-  <h2>해군 입영 안내 챗봇</h2>
-  <div id="chat" style="border:1px solid #ccc; height:300px; overflow:auto; padding:10px;"></div>
+  <div class="notice-bar" id="noticeBar">
+    공지 로딩 중...
+  </div>
 
-  <input id="msg" placeholder="질문을 입력하세요" style="width:70%;">
-  <button id="sendBtn">전송</button>
+  <div class="wrap">
+    <div class="card">
+      <h1>해군병 과정 안내 챗봇</h1>
+      <div class="sub" id="metaText">안내 정보를 불러오는 중입니다.</div>
+
+      <div class="section-title">자주 묻는 질문 분류</div>
+      <div id="categoryTabs"></div>
+
+      <div class="section-title">바로 선택 질문</div>
+      <div id="faq"></div>
+
+      <div id="chat"></div>
+
+      <div class="input-wrap">
+        <input id="msg" placeholder="질문을 입력하세요" />
+        <button id="sendBtn">전송</button>
+      </div>
+
+      <a class="admin-link" href="/admin?cohort=722">관리자 통계 보기</a>
+    </div>
+  </div>
 
   <script src="/static/app.js"></script>
 </body>
