@@ -7,7 +7,7 @@ const noticeBar = document.getElementById("noticeBar");
 const metaText = document.getElementById("metaText");
 
 const params = new URLSearchParams(location.search);
-const cohort = params.get("cohort") || "722";
+const cohort = params.get("cohort") || "724";
 
 let fullFaq = [];
 let currentCategory = "전체";
@@ -176,7 +176,7 @@ async function init() {
   await loadFaq();
   renderCategories();
   renderFaqButtons();
-  addBubble("안녕하세요. 해군 724기 입영 안내 챗봇입니다. 위 질문 버튼을 누르거나 직접 질문해 주세요.", "bot");
+  addBubble("안녕하세요. 해군병 724기 안내 챗봇입니다. 위 질문 버튼을 누르거나 직접 질문해 주세요.", "bot");
 }
 
 init();
