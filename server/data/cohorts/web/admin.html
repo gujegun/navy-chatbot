@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>챗봇 관리자 통계</title>
+  <style>
+    body{
+      margin:0;
+      background:#f4f6fb;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+      color:#111827;
+    }
+    .wrap{
+      max-width:760px;
+      margin:0 auto;
+      padding:16px;
+    }
+    .card{
+      background:#fff;
+      border-radius:18px;
+      box-shadow:0 6px 20px rgba(0,0,0,0.06);
+      padding:18px;
+    }
+    h1{
+      margin:0 0 12px 0;
+      font-size:22px;
+    }
+    .sub{
+      color:#6b7280;
+      margin-bottom:18px;
+    }
+    .item{
+      padding:12px;
+      border:1px solid #e5e7eb;
+      border-radius:12px;
+      margin-bottom:10px;
+      background:#fafafa;
+    }
+    .q{
+      font-weight:800;
+      margin-bottom:4px;
+    }
+    .count{
+      color:#2563eb;
+      font-weight:700;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>챗봇 관리자 통계</h1>
+      <div class="sub" id="meta">로딩 중...</div>
+      <div id="stats"></div>
+    </div>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(location.search);
+    const cohort = params.get("cohort") || "722";
+
+    async function loadStats() {
+      const meta = document.getElementById("meta");
+      const box = document.getElementById("stats");
+
+      try {
+        const res = await fetch(`/api/stats/${cohort}`);
+        const data = await res.json();
+
+        meta.innerText = `${cohort}기 기준 많이 질문한 내용 TOP 20`;
+
+        if (!data.top_questions || data.top_questions.length === 0) {
+          box.innerHTML = "<div class='item'>아직 기록된 질문이 없습니다.</div>";
+          return;
+        }
+
+        box.innerHTML = "";
+        data.top_questions.forEach((item, idx) => {
+          const q = item[0];
+          const count = item[1];
+
+          const div = document.createElement("div");
+          div.className = "item";
+          div.innerHTML = `
+            <div class="q">${idx + 1}. ${q}</div>
+            <div class="count">질문 횟수: ${count}회</div>
+          `;
+          box.appendChild(div);
+        });
+      } catch (e) {
+        meta.innerText = "통계를 불러오지 못했습니다.";
+      }
+    }
+
+    loadStats();
+  </script>
+</body>
+</html>
