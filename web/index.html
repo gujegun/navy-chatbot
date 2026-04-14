@@ -2,68 +2,226 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>해군 입영 안내 챗봇</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>해군병 과정 안내 챗봇</title>
   <style>
-    body { margin:0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans KR", sans-serif; background:#f6f7fb; }
-    .wrap { max-width: 840px; margin:0 auto; padding:12px; }
-    .card { background:#fff; border-radius:14px; box-shadow: 0 6px 18px rgba(0,0,0,.06); overflow:hidden; }
-    .header { padding:14px 14px 10px; }
-    .title { font-size:18px; font-weight:800; margin:0; }
-    .sub { color:#666; font-size:13px; margin-top:6px; line-height:1.4; }
+    :root{
+      --bg:#f4f6fb;
+      --card:#ffffff;
+      --line:#e5e7eb;
+      --text:#111827;
+      --muted:#6b7280;
+      --primary:#1d4ed8;
+      --primary-dark:#1e40af;
+      --chip:#ffffff;
+    }
 
-    /* 공지 상단 고정 */
-    .noticeBar { position: sticky; top: 0; z-index: 10; background:#0b57d0; color:#fff; padding:10px 12px; font-size:13px; }
-    .noticeBar strong { font-weight:800; }
-    .noticeBar .small { opacity:.9; font-size:12px; display:block; margin-top:4px; }
+    *{ box-sizing:border-box; }
 
-    /* FAQ 버튼 */
-    #faq { display:flex; gap:8px; flex-wrap:wrap; padding:12px 12px 0; }
-    .faqBtn { border:1px solid #e3e6ef; background:#fff; padding:10px 12px; border-radius:999px; font-size:13px; cursor:pointer; }
-    .faqBtn:active { transform: translateY(1px); }
+    body{
+      margin:0;
+      background:var(--bg);
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+      color:var(--text);
+    }
 
-    /* 채팅 */
-    #chat { margin:12px; height: 58vh; min-height: 360px; background:#f8f9ff; border:1px solid #e8ebf5; border-radius:12px; padding:10px; overflow:auto; }
-    .row { display:flex; margin:8px 0; }
-    .me { justify-content:flex-end; }
-    .bot { justify-content:flex-start; }
-    .bubble { max-width: 82%; padding:10px 12px; border-radius:14px; font-size:14px; line-height:1.45; white-space:pre-wrap; }
-    .bubble.me { background:#0b57d0; color:#fff; border-top-right-radius:6px; }
-    .bubble.bot { background:#fff; border:1px solid #e3e6ef; border-top-left-radius:6px; }
+    .notice-bar{
+      position:sticky;
+      top:0;
+      z-index:100;
+      background:var(--primary);
+      color:#fff;
+      padding:12px 14px;
+      font-size:14px;
+      font-weight:700;
+    }
 
-    /* 입력 */
-    .inputBar { display:flex; gap:8px; padding:12px; border-top:1px solid #eef1f7; background:#fff; }
-    #msg { flex:1; font-size:16px; padding:12px; border-radius:12px; border:1px solid #dfe3ef; outline:none; }
-    #sendBtn { padding:12px 14px; border:none; border-radius:12px; background:#111827; color:#fff; font-weight:700; cursor:pointer; }
-    #sendBtn:active { transform: translateY(1px); }
+    .wrap{
+      max-width:860px;
+      margin:0 auto;
+      padding:14px;
+    }
 
-    @media (max-width: 480px) {
-      #chat { height: 62vh; min-height: 420px; }
-      .title { font-size:17px; }
+    .card{
+      background:var(--card);
+      border-radius:20px;
+      box-shadow:0 6px 20px rgba(0,0,0,0.06);
+      padding:18px;
+    }
+
+    h1{
+      margin:0 0 8px 0;
+      font-size:22px;
+      font-weight:900;
+    }
+
+    .sub{
+      color:var(--muted);
+      line-height:1.5;
+      font-size:14px;
+      margin-bottom:16px;
+    }
+
+    .section-title{
+      font-size:15px;
+      font-weight:900;
+      margin:14px 0 10px 0;
+    }
+
+    #categoryTabs, #faq{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+    }
+
+    .tab-btn, .faq-btn{
+      border:1px solid var(--line);
+      background:var(--chip);
+      border-radius:999px;
+      padding:10px 14px;
+      font-size:15px;
+      cursor:pointer;
+      font-weight:700;
+    }
+
+    .tab-btn.active{
+      background:var(--primary);
+      color:#fff;
+      border-color:var(--primary);
+    }
+
+    .faq-btn{
+      font-size:14px;
+      background:#fff;
+    }
+
+    #chat{
+      margin-top:16px;
+      background:#f8f9fc;
+      border:1px solid var(--line);
+      border-radius:18px;
+      min-height:380px;
+      max-height:540px;
+      overflow:auto;
+      padding:14px;
+    }
+
+    .msg-row{
+      display:flex;
+      margin:10px 0;
+    }
+
+    .msg-row.me{
+      justify-content:flex-end;
+    }
+
+    .msg-row.bot{
+      justify-content:flex-start;
+    }
+
+    .bubble{
+      max-width:82%;
+      padding:12px 14px;
+      border-radius:18px;
+      line-height:1.5;
+      white-space:pre-wrap;
+      font-size:15px;
+    }
+
+    .bubble.me{
+      background:var(--primary);
+      color:#fff;
+      border-bottom-right-radius:6px;
+    }
+
+    .bubble.bot{
+      background:#fff;
+      border:1px solid var(--line);
+      border-bottom-left-radius:6px;
+    }
+
+    .input-wrap{
+      display:flex;
+      gap:8px;
+      margin-top:14px;
+    }
+
+    #msg{
+      flex:1;
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:14px;
+      font-size:16px;
+      outline:none;
+      background:#fff;
+    }
+
+    #sendBtn{
+      border:none;
+      background:#111827;
+      color:#fff;
+      border-radius:14px;
+      padding:0 18px;
+      font-size:16px;
+      font-weight:800;
+      cursor:pointer;
+    }
+
+    .admin-link{
+      display:inline-block;
+      margin-top:12px;
+      font-size:12px;
+      color:#6b7280;
+      text-decoration:none;
+    }
+
+    @media (max-width: 480px){
+      .wrap{ padding:10px; }
+      .card{ padding:14px; border-radius:16px; }
+      h1{ font-size:18px; }
+      .sub{ font-size:13px; }
+      .tab-btn, .faq-btn{
+        font-size:14px;
+        padding:10px 12px;
+      }
+      #chat{
+        min-height:320px;
+        max-height:460px;
+      }
+      .bubble{
+        max-width:88%;
+        font-size:15px;
+      }
+      #msg{
+        font-size:16px;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="noticeBar" id="noticeBar">
-    <strong>공지</strong> 로딩 중...
-    <span class="small" id="noticeSub"></span>
+  <div class="notice-bar" id="noticeBar">
+    공지 로딩 중...
   </div>
 
   <div class="wrap">
     <div class="card">
-      <div class="header">
-        <h1 class="title">해군 입영 안내 챗봇</h1>
-        <div class="sub" id="meta"></div>
-      </div>
+      <h1>해군병 과정 안내 챗봇</h1>
+      <div class="sub" id="metaText">안내 정보를 불러오는 중입니다.</div>
 
+      <div class="section-title">자주 묻는 질문 분류</div>
+      <div id="categoryTabs"></div>
+
+      <div class="section-title">바로 선택 질문</div>
       <div id="faq"></div>
 
       <div id="chat"></div>
 
-      <div class="inputBar">
-        <input id="msg" placeholder="질문을 입력하세요 (예: 준비물 뭐 챙겨야 해?)" />
+      <div class="input-wrap">
+        <input id="msg" placeholder="질문을 입력하세요" />
         <button id="sendBtn">전송</button>
       </div>
+
+      <a class="admin-link" href="/admin?cohort=722">관리자 통계 보기</a>
     </div>
   </div>
 
